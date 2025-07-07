@@ -1,0 +1,19 @@
+<a href="/os/<%= ordem.codigo %>/imprevistos" class="btn btn-outline-secondary mb-3">
+  ⬅️ Voltar
+</a>
+
+<h2>📝 Dificuldades & Recomendações</h2>
+<form action="/os/<%= ordem.codigo %>/finalizacao" method="POST">
+  <div class="row g-4">
+    <div class="col-12 col-md-6">
+      <label for="dificuldades" class="form-label">Dificuldades encontradas</label>
+      <textarea class="form-control" id="dificuldades" name="dificuldades" rows="4"><%= ordem.dificuldades || '' %></textarea>
+    </div>
+    <div class="col-12 col-md-6">
+      <label for="recomendacoes" class="form-label">Recomendações ao cliente</label>
+      <textarea class="form-control" id="recomendacoes" name="recomendacoes" rows="4"><%= ordem.recomendacoes || '' %></textarea>
+    </div>
+  </div>
+
+  <button type="submit" class="btn btn-success mt-4 w-100">Salvar e continuar</button>
+</form>

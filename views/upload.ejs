@@ -1,0 +1,42 @@
+<a href="/os/<%= ordem.codigo %>" 
+   class="btn btn-outline-secondary mb-3 d-md-none">
+  ⬅️ Voltar
+</a>
+
+<h2>📷 Upload de Mídia</h2>
+<p>Tipo de Mídia: <strong><%= tipo.charAt(0).toUpperCase() + tipo.slice(1) %></strong></p>
+
+<form action="/os/<%= ordem.codigo %>/upload" 
+      method="POST" 
+      enctype="multipart/form-data">
+  <input type="hidden" name="tipo" value="<%= tipo %>">
+
+  <div class="mb-3">
+    <label for="arquivo" class="form-label">Selecione o arquivo</label>
+    <input class="form-control" 
+           type="file" 
+           name="arquivo" 
+           id="arquivo" 
+           accept="image/*,video/*" 
+           required>
+  </div>
+
+  <button type="submit" class="btn btn-primary w-100">
+    Enviar
+  </button>
+</form>
+
+<% if (ordem.fotos[tipo] && ordem.fotos[tipo].length) { %>
+  <hr>
+  <h5>Arquivos já enviados:</h5>
+  <ul class="list-group">
+    <% ordem.fotos[tipo].forEach(file => { %>
+      <li class="list-group-item">
+        <a href="<%= file.url %>" target="_blank">
+          <i class="bi bi-file-earmark-arrow-up"></i> 
+          <%= file.nome %>
+        </a>
+      </li>
+    <% }) %>
+  </ul>
+<% } %>

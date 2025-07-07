@@ -1,0 +1,97 @@
+<h2 class="mb-4">📄 Relatórios de Ordens de Serviço</h2>
+
+<!-- Formulário de Filtros -->
+<form class="row g-3 mb-4" method="GET" action="/status">
+  <div class="col-md-3">
+    <label class="form-label">Técnico</label>
+    <select name="tecnico" class="form-select">
+      <option value="">Todos</option>
+      <% tecnicos.forEach(t => { %>
+        <option value="<%= t %>"
+          <%= filtros.tecnico === t ? 'selected' : '' %>>
+          <%= t %>
+        </option>
+      <% }) %>
+    </select>
+  </div>
+  <div class="col-md-3">
+    <label class="form-label">Status</label>
+    <select name="status" class="form-select">
+      <option value="">Todos</option>
+      <% statuses.forEach(s => { %>
+        <option value="<%= s %>"
+          <%= filtros.status === s ? 'selected' : '' %>>
+          <%= s %>
+        </option>
+      <% }) %>
+    </select>
+  </div>
+  <div class="col-md-3">
+    <label class="form-label">Previsão</label>
+    <input type="date"
+      name="data"
+      class="form-control"
+      value="<%= filtros.data || '' %>">
+  </div>
+  <div class="col-md-3 d-flex align-items-end">
+    <button class="btn btn-primary w-100">Filtrar</button>
+  </div>
+</form>
+
+<!-- Botão de Download .zip -->
+<div class="mb-3 text-end">
+  <a href="/status/download" class="btn btn-success">
+    📥 Baixar ZIP
+  </a>
+</div>
+
+<!-- Tabela de Relatórios (apenas desktop) -->
+<div class="table-responsive d-none d-md-block">
+  <table class="table table-striped table-hover">
+    <thead class="table-light">
+      <tr>
+        <th>Código</th>
+        <th>Título</th>
+        <th>Técnico</th>
+        <th>Status</th>
+        <th>Previsão</th>
+        <th>Criado Em</th>
+      </tr>
+    </thead>
+    <tbody>
+      <% ordens.forEach(os => { %>
+        <tr>
+          <td>#<%= os.codigo %></td>
+          <td><%= os.titulo %></td>
+          <td><%= os.tecnico %></td>
+          <td>
+            <span class="badge 
+              <%= os.status === 'Pendente'    ? 'bg-secondary' :
+                  os.status === 'Em execução' ? 'bg-primary' :
+                                                'bg-success' %>">
+              <%= os.status %>
+            </span>
+          </td>
+          <td><%= os.previsao || '-' %></td>
+          <td><%= new Date(os.criadoEm).toLocaleString() %></td>
+        </tr>
+      <% }) %>
+    </tbody>
+  </table>
+</div>
+
+<!-- Cards de Relatórios (mobile simplificado) -->
+<div class="d-md-none">
+  <% ordens.forEach(os => { %>
+    <div class="card mb-2">
+      <div class="card-body">
+        <h5>#<%= os.codigo %> - <%= os.titulo %></h5>
+        <p>
+          <strong>Técnico:</strong> <%= os.tecnico %><br>
+          <strong>Status:</strong> <%= os.status %><br>
+          <strong>Previsão:</strong> <%= os.previsao || '-' %>
+        </p>
+      </div>
+    </div>
+  <% }) %>
+</div>

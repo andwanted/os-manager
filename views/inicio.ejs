@@ -1,0 +1,29 @@
+<a href="/os/<%= ordem.codigo %>/preparo" class="btn btn-outline-secondary mb-3">
+  ⬅️ Voltar
+</a>
+
+<h2>📍 Chegada ao Local</h2>
+<form action="/os/<%= ordem.codigo %>/inicio" method="POST">
+  <div class="row g-4">
+    <div class="col-12 col-md-6">
+      <label class="form-label d-block">Local conforme?</label>
+      <div class="form-check">
+        <input class="form-check-input" type="radio" name="conforme" id="conformeSim" value="sim"
+          <%= ordem.observacoes_inicio?.conforme ? 'checked' : '' %> >
+        <label class="form-check-label" for="conformeSim">Sim</label>
+      </div>
+      <div class="form-check">
+        <input class="form-check-input" type="radio" name="conforme" id="conformeNao" value="nao"
+          <%= ordem.observacoes_inicio?.conforme === false ? 'checked' : '' %> >
+        <label class="form-check-label" for="conformeNao">Não</label>
+      </div>
+    </div>
+
+    <div class="col-12 col-md-6">
+      <label for="texto" class="form-label">Observações iniciais</label>
+      <textarea class="form-control" name="texto" id="texto" rows="4"><%= ordem.observacoes_inicio?.texto || '' %></textarea>
+    </div>
+  </div>
+
+  <button type="submit" class="btn btn-primary mt-4 w-100">Salvar e continuar</button>
+</form>

@@ -1,0 +1,57 @@
+
+
+<h2 class="mb-4">📋 Minhas Ordens de Serviço</h2>
+
+<!-- MOBILE: Cards -->
+<div class="d-md-none">
+  <% ordens.forEach(ordem => { %>
+    <div class="card mb-3">
+      <div class="card-body">
+        <h5 class="card-title">#<%= ordem.codigo %> - <%= ordem.titulo %></h5>
+        <p class="card-text">
+          <strong>Status:</strong> <%= ordem.status %><br>
+          <strong>Técnico:</strong> <%= ordem.tecnico %>
+        </p>
+        <a href="/os/<%= ordem.codigo %>" class="btn btn-primary w-100">Ver OS</a>
+      </div>
+    </div>
+  <% }) %>
+</div>
+
+<!-- DESKTOP: Tabela -->
+<div class="d-none d-md-block">
+  <table class="table table-striped table-hover">
+    <thead class="table-light">
+      <tr>
+        <th>Código</th>
+        <th>Título</th>
+        <th>Técnico</th>
+        <th>Status</th>
+        <th>Data</th>
+        <th>Ações</th>
+      </tr>
+    </thead>
+    <tbody>
+      <% ordens.forEach(ordem => { %>
+        <tr>
+          <td>#<%= ordem.codigo %></td>
+          <td><%= ordem.titulo %></td>
+          <td><%= ordem.tecnico %></td>
+          <td>
+            <% if (ordem.status === 'Pendente') { %>
+              <span class="badge bg-secondary">Pendente</span>
+            <% } else if (ordem.status === 'Em execução') { %>
+              <span class="badge bg-primary">Em execução</span>
+            <% } else { %>
+              <span class="badge bg-success">Concluído</span>
+            <% } %>
+          </td>
+          <td><%= ordem.previsao || '-' %></td>
+          <td>
+            <a href="/os/<%= ordem.codigo %>" class="btn btn-sm btn-outline-primary">Ver</a>
+          </td>
+        </tr>
+      <% }) %>
+    </tbody>
+  </table>
+</div>

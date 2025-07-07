@@ -1,0 +1,12 @@
+<a href="/os/<%= ordem.codigo %>" class="btn btn-outline-secondary mb-3 d-md-none">
+  ⬅️ Minhas OSs
+</a>
+
+<h2>⚠️ Registro de Imprevistos</h2>
+<form action="/os/<%= ordem.codigo %>/imprevistos" method="POST">
+  <div class="mb-3">
+    <label for="imprevistos" class="form-label">Descreva qualquer imprevisto encontrado</label>
+    <textarea class="form-control" id="imprevistos" name="imprevistos" rows="5"><%= ordem.imprevistos || '' %></textarea>
+  </div>
+  <button type="submit" class="btn btn-warning mt-3 w-100">Salvar e continuar</button>
+</form>
