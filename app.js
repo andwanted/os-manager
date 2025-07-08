@@ -7,6 +7,12 @@ const osRoutes = require('./routes/os');
 const statusRoutes = require('./routes/status');
 const app = express();
 
+// no topo do app.js
+const generateStatus = require('./generateStatus')
+
+
+
+
 
 // 1) View engine + Layouts
 app.set('view engine', 'ejs');
@@ -23,7 +29,7 @@ app.use('/', osRoutes);
 app.use('/', statusRoutes);
 
 // 4) Geração de relatórios (se precisar)
-// require('./generateStatus')();
+require('./generateStatus')();
 
 // 5) Iniciar servidor
 const PORT = process.env.PORT || 3000;

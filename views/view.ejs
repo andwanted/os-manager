@@ -1,5 +1,5 @@
 <% 
-  // definição das etapas e estados
+  // === DEFINIÇÃO DAS ETAPAS ===
   const steps = [
     { key: 'preparo',           label: 'Preparo',       done: !!(
          ordem.checklist_preparo?.combustivel &&
@@ -19,7 +19,7 @@
   const activeIdx = nextIdx < 0 ? steps.length - 1 : nextIdx;
   const pctDone   = Math.round(doneCount / steps.length * 100);
 
-  // nav fixo
+  // === LINKS E MAPAS ===
   const listLink = `/os?tecnico=${encodeURIComponent(ordem.tecnico)}`;
   const hasNext  = activeIdx < steps.length - 1;
   const nextKey  = hasNext ? steps[activeIdx + 1].key : null;
@@ -31,16 +31,9 @@
     finalizacao: 'Finalização',
     'upload?tipo=final': 'Mídia Final'
   };
-
-  // ações para grid, com estado
-  const actions = steps.map(s => ({
-    key   : s.key,
-    label : s.label,
-    done  : s.done,
-    url   : `/os/${ordem.codigo}/${s.key}`
-  }));
 %>
 
+<!-- === CABEÇALHO DA OS === -->
 <div class="card shadow-sm mb-4">
   <div class="card-header bg-white d-flex justify-content-between align-items-center">
     <div>
@@ -60,38 +53,33 @@
 
   <div class="card-body">
 
-    <!-- contador X/Y -->
+    <!-- === CONTADOR DE ETAPAS === -->
     <div class="d-flex justify-content-end mb-2">
       <span class="fw-bold"><%= doneCount %> / <%= steps.length %> etapas concluídas</span>
     </div>
 
-    <!-- stepper com ícones -->
+    <!-- === STEPPER VISUAL COM ÍCONES === -->
     <nav aria-label="Progress">
       <ol class="list-unstyled d-flex justify-content-between mb-3">
-        <% steps.forEach((step,i)=>{ %>
+        <% steps.forEach((step, i) => { 
+             const color = step.done ? 'bg-success text-white' :
+                           i === activeIdx ? 'bg-primary text-white' :
+                           'bg-light text-muted';
+        %>
           <li class="text-center flex-fill position-relative">
-            <div class="mx-auto mb-1 rounded-circle d-flex 
-                        align-items-center justify-content-center
-                        <%=
-                          step.done       ? 'bg-success text-white' :
-                          i===activeIdx   ? 'bg-primary text-white' :
-                                            'bg-light text-muted'
-                        %>" 
+            <div class="mx-auto mb-1 rounded-circle d-flex align-items-center justify-content-center <%= color %>" 
                  style="width:2.5rem;height:2.5rem">
               <i class="bi 
-                <%=
-                  step.key==='preparo'            ? 'bi-tools' :
-                  step.key==='inicio'             ? 'bi-pin-map' :
-                  step.key==='upload?tipo=inicio' ? 'bi-camera' :
-                  step.key==='imprevistos'        ? 'bi-exclamation-triangle' :
-                  step.key==='finalizacao'        ? 'bi-pencil-square' :
-                                                    'bi-camera-reels'
-                %>"></i>
+                <%= step.key==='preparo'            ? 'bi-tools' :
+                    step.key==='inicio'             ? 'bi-pin-map' :
+                    step.key==='upload?tipo=inicio' ? 'bi-camera' :
+                    step.key==='imprevistos'        ? 'bi-exclamation-triangle' :
+                    step.key==='finalizacao'        ? 'bi-pencil-square' :
+                                                      'bi-camera-reels' %>">
+              </i>
             </div>
-            <small class="<%= i===activeIdx ? 'text-primary' : '' %>">
-              <%= step.label %>
-            </small>
-            <% if(i<steps.length-1){ %>
+            <small class="<%= i === activeIdx ? 'text-primary' : '' %>"><%= step.label %></small>
+            <% if(i < steps.length - 1){ %>
               <div class="position-absolute top-50 end-0 bg-light" 
                    style="width:100%;height:2px;margin-left:1.3rem;z-index:-1">
               </div>
@@ -101,30 +89,36 @@
       </ol>
     </nav>
 
-    <!-- barra de progresso -->
+    <!-- === BARRA DE PROGRESSO === -->
     <div class="progress mb-4" style="height:1rem">
-      <div class="progress-bar bg-primary" role="progressbar"
-           style="width:<%= pctDone %>%;"></div>
+      <div class="progress-bar bg-primary" role="progressbar" style="width:<%= pctDone %>%;">
+      </div>
     </div>
 
-    <!-- grid de ações com cor dinâmica -->
+    <!-- === GRID DE AÇÕES COM BLOQUEIO === -->
     <div class="row row-cols-2 row-cols-md-3 g-3 mb-4">
-      <% actions.forEach(a=>{ %>
+      <% steps.forEach((step, i) => {
+           const isDone = step.done;
+           const isActive = i === activeIdx;
+           const isLocked = i > activeIdx;
+           const btnClass = isDone
+             ? 'btn-success'
+             : isActive
+               ? 'btn-primary'
+               : 'btn-outline-secondary';
+      %>
         <div class="col">
-          <a href="<%= a.url %>" 
-             class="btn <%= a.done ? 'btn-success' : 'btn-outline-primary' %> 
-                    w-100 h-100 py-4 
-                    d-flex flex-column align-items-center 
-                    justify-content-center shadow-sm">
+          <a href="<%= isLocked ? '#' : `/os/${ordem.codigo}/${step.key}` %>"
+             class="btn <%= btnClass %> w-100 h-100 py-4 d-flex flex-column align-items-center justify-content-center shadow-sm <%= isLocked ? 'disabled' : '' %>">
             <i class="bi bi-<%= 
-              a.key==='preparo'            ? 'tools' :
-              a.key==='inicio'             ? 'pin-map' :
-              a.key==='upload?tipo=inicio' ? 'camera' :
-              a.key==='imprevistos'        ? 'exclamation-triangle' :
-              a.key==='finalizacao'        ? 'pencil-square' :
-                                             'camera-reels'
+              step.key==='preparo'            ? 'tools' :
+              step.key==='inicio'             ? 'pin-map' :
+              step.key==='upload?tipo=inicio' ? 'camera' :
+              step.key==='imprevistos'        ? 'exclamation-triangle' :
+              step.key==='finalizacao'        ? 'pencil-square' :
+                                                'camera-reels'
             %> fs-2 mb-2"></i>
-            <span><%= a.label %></span>
+            <span><%= step.label %></span>
           </a>
         </div>
       <% }) %>
@@ -133,15 +127,17 @@
   </div>
 </div>
 
-<!-- navbar fixa com voltar e próximo -->
+<!-- === NAVBAR FIXA COM VOLTAR E PRÓXIMO === -->
 <nav class="navbar fixed-bottom bg-white border-top py-2 d-none d-md-flex">
   <div class="container d-flex justify-content-between">
     <a href="<%= listLink %>" class="btn btn-light shadow-sm">
       <i class="bi bi-list"></i> Minhas OSs
     </a>
-    <% if (hasNext) { %>
-      <a href="/os/<%= ordem.codigo %>/<%= nextKey %>" 
-         class="btn btn-primary shadow-sm">
+    <% if (hasNext) { 
+         const canAdvance = steps[activeIdx].done;
+    %>
+      <a href="<%= canAdvance ? `/os/${ordem.codigo}/${nextKey}` : '#' %>" 
+         class="btn <%= canAdvance ? 'btn-primary' : 'btn-outline-secondary disabled' %> shadow-sm">
         Próximo: <%= mapLabel[nextKey] %> 
         <i class="bi bi-arrow-right-circle"></i>
       </a>
@@ -149,6 +145,7 @@
   </div>
 </nav>
 
+<!-- === AJUSTE DE ESPAÇO PARA NAVBAR === -->
 <style>
   body { padding-bottom: 80px; }
 </style>
