@@ -1,17 +1,19 @@
 <% 
-  // === DEFINIÇÃO DAS ETAPAS ===
+  // === DEFINIÇÃO DAS ETAPAS NOVAS ===
   const steps = [
-    { key: 'preparo',           label: 'Preparo',       done: !!(
+    { key: 'preparo', label: 'Preparo', done: !!(
          ordem.checklist_preparo?.combustivel &&
          ordem.checklist_preparo?.ferramentas &&
          ordem.checklist_preparo?.epi) },
-    { key: 'inicio',            label: 'Chegada',       done: !!ordem.observacoes_inicio },
-    { key: 'upload?tipo=inicio',label: 'Mídia Início',  done: ordem.fotos.inicio?.length > 0 },
-    { key: 'imprevistos',       label: 'Imprevistos',   done: !!ordem.imprevistos },
-    { key: 'finalizacao',       label: 'Finalização',   done: !!(
+
+    { key: 'inicio', label: 'Chegada', done: !!ordem.observacoes_inicio },
+
+    { key: 'imprevistos', label: 'Anotações', done: !!(
+         ordem.imprevistos?.trim() ||
          ordem.dificuldades?.trim() ||
          ordem.recomendacoes?.trim()) },
-    { key: 'upload?tipo=final', label: 'Mídia Final',   done: ordem.fotos.final?.length > 0 }
+
+    { key: 'upload?tipo=final', label: 'Mídia Finalização', done: ordem.fotos.final?.length > 0 }
   ];
 
   const doneCount = steps.filter(s => s.done).length;
@@ -26,10 +28,8 @@
   const mapLabel = {
     preparo: 'Preparo',
     inicio: 'Chegada',
-    'upload?tipo=inicio': 'Mídia Início',
-    imprevistos: 'Imprevistos',
-    finalizacao: 'Finalização',
-    'upload?tipo=final': 'Mídia Final'
+    imprevistos: 'Anotações',
+    'upload?tipo=final': 'Mídia Finalização'
   };
 %>
 
@@ -53,6 +53,65 @@
 
   <div class="card-body">
 
+
+    <!-- === GALERIA DE MÍDIAS ENVIADAS === -->
+<% if ((ordem.fotos?.inicio?.length || 0) + (ordem.fotos?.final?.length || 0) > 0) { %>
+  <h4 class="mb-3">Mídias Enviadas</h4>
+  <div class="row row-cols-1 row-cols-md-3 g-4 mb-4">
+
+    <% if (ordem.fotos.inicio?.length > 0) { %>
+      <% ordem.fotos.inicio.forEach((foto) => { %>
+        <div class="col">
+          <div class="card h-100 shadow-sm">
+            <div class="card-header text-center bg-light">
+              <strong>Mídia Início</strong>
+            </div>
+            <div class="card-body d-flex align-items-center justify-content-center p-2">
+              <% if (foto.url.match(/\.(mp4|mov|avi|webm)$/i)) { %>
+                <video src="<%= foto.url %>" controls style="width: 100%; border-radius: 0.5rem;"></video>
+              <% } else { %>
+                <img src="<%= foto.url %>" class="img-fluid rounded" alt="<%= foto.nome %>">
+              <% } %>
+            </div>
+          </div>
+        </div>
+
+
+
+<% if ((ordem.fotos.inicio?.length || 0) === 0) { %>
+  <a href="/os/<%= ordem.codigo %>/upload?tipo=inicio" class="btn btn-outline-primary mb-3">
+    <i class="bi bi-camera"></i> Enviar Mídia Inicial
+  </a>
+<% } else { %>
+
+<% } %>
+
+      <% }) %>
+    <% } %>
+
+    <% if (ordem.fotos.final?.length > 0) { %>
+      <% ordem.fotos.final.forEach((foto) => { %>
+        <div class="col">
+          <div class="card h-100 shadow-sm">
+            <div class="card-header text-center bg-light">
+              <strong>Mídia Final</strong>
+            </div>
+            <div class="card-body d-flex align-items-center justify-content-center p-2">
+              <% if (foto.url.match(/\.(mp4|mov|avi|webm)$/i)) { %>
+                <video src="<%= foto.url %>" controls style="width: 100%; border-radius: 0.5rem;"></video>
+              <% } else { %>
+                <img src="<%= foto.url %>" class="img-fluid rounded" alt="<%= foto.nome %>">
+              <% } %>
+            </div>
+          </div>
+        </div>
+      <% }) %>
+    <% } %>
+
+  </div>
+<% } %>
+
+
     <!-- === CONTADOR DE ETAPAS === -->
     <div class="d-flex justify-content-end mb-2">
       <span class="fw-bold"><%= doneCount %> / <%= steps.length %> etapas concluídas</span>
@@ -72,10 +131,8 @@
               <i class="bi 
                 <%= step.key==='preparo'            ? 'bi-tools' :
                     step.key==='inicio'             ? 'bi-pin-map' :
-                    step.key==='upload?tipo=inicio' ? 'bi-camera' :
-                    step.key==='imprevistos'        ? 'bi-exclamation-triangle' :
-                    step.key==='finalizacao'        ? 'bi-pencil-square' :
-                                                      'bi-camera-reels' %>">
+                    step.key==='imprevistos'        ? 'bi-journal-text' :
+                                                       'bi-camera-reels' %>">
               </i>
             </div>
             <small class="<%= i === activeIdx ? 'text-primary' : '' %>"><%= step.label %></small>
@@ -96,7 +153,7 @@
     </div>
 
     <!-- === GRID DE AÇÕES COM BLOQUEIO === -->
-    <div class="row row-cols-2 row-cols-md-3 g-3 mb-4">
+    <div class="row row-cols-2 row-cols-md-4 g-3 mb-4">
       <% steps.forEach((step, i) => {
            const isDone = step.done;
            const isActive = i === activeIdx;
@@ -113,9 +170,7 @@
             <i class="bi bi-<%= 
               step.key==='preparo'            ? 'tools' :
               step.key==='inicio'             ? 'pin-map' :
-              step.key==='upload?tipo=inicio' ? 'camera' :
-              step.key==='imprevistos'        ? 'exclamation-triangle' :
-              step.key==='finalizacao'        ? 'pencil-square' :
+              step.key==='imprevistos'        ? 'journal-text' :
                                                 'camera-reels'
             %> fs-2 mb-2"></i>
             <span><%= step.label %></span>

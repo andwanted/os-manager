@@ -1,10 +1,10 @@
-const express       = require('express');
-const fs            = require('fs');
-const path          = require('path');
-const multer        = require('multer');
-const cloudinary    = require('../cloudinary');
-const router        = express.Router();
-const upload        = multer({ storage: multer.memoryStorage() });
+const express    = require('express');
+const fs         = require('fs');
+const path       = require('path');
+const multer     = require('multer');
+const cloudinary = require('../cloudinary');
+const router     = express.Router();
+const upload     = multer({ storage: multer.memoryStorage() });
 
 const dataPath = path.join(__dirname, '../data/ordens.json');
 
@@ -14,14 +14,14 @@ function gerarCodigo() {
 }
 
 // =========================
-// GET /criar — formulário de criação de OS
+// GET /criar
 // =========================
 router.get('/criar', (req, res) => {
   res.render('create', { title: 'Criar Nova OS' });
 });
 
 // =========================
-// POST /criar — cria uma nova OS
+// POST /criar
 // =========================
 router.post('/criar', (req, res) => {
   const { titulo, descricao, endereco, previsao, tecnico } = req.body;
@@ -36,13 +36,12 @@ router.post('/criar', (req, res) => {
     previsao,
     tecnico,
     status: 'Pendente',
-    fotos: { inicio: [], final: [] },
+    fotos: { final: [] },
     checklist_preparo: {},
     observacoes_inicio: null,
     imprevistos: '',
     dificuldades: '',
     recomendacoes: '',
-    checklist: {},
     criadoEm: new Date().toISOString()
   };
 
@@ -60,7 +59,7 @@ router.post('/criar', (req, res) => {
 });
 
 // =========================
-// GET /os — lista de OSs (filtro por técnico e/ou data)
+// GET /os — lista de OSs
 // =========================
 router.get('/os', (req, res) => {
   const { tecnico, data } = req.query;
@@ -78,7 +77,7 @@ router.get('/os', (req, res) => {
 });
 
 // =========================
-// GET /os/:codigo — exibe detalhes da OS
+// GET /os/:codigo — detalhes
 // =========================
 router.get('/os/:codigo', (req, res) => {
   const codigo = req.params.codigo;
@@ -90,7 +89,7 @@ router.get('/os/:codigo', (req, res) => {
 });
 
 // =========================
-// GET /os/:codigo/preparo — formulário de checklist de preparo
+// GET/POST /preparo
 // =========================
 router.get('/os/:codigo/preparo', (req, res) => {
   const codigo = req.params.codigo;
@@ -104,9 +103,6 @@ router.get('/os/:codigo/preparo', (req, res) => {
   });
 });
 
-// =========================
-// POST /os/:codigo/preparo — salva checklist de preparo
-// =========================
 router.post('/os/:codigo/preparo', (req, res) => {
   const codigo = req.params.codigo;
   const dados  = JSON.parse(fs.readFileSync(dataPath));
@@ -130,7 +126,7 @@ router.post('/os/:codigo/preparo', (req, res) => {
 });
 
 // =========================
-// GET /os/:codigo/inicio — formulário de observações iniciais
+// GET/POST /inicio
 // =========================
 router.get('/os/:codigo/inicio', (req, res) => {
   const codigo = req.params.codigo;
@@ -140,13 +136,10 @@ router.get('/os/:codigo/inicio', (req, res) => {
 
   res.render('inicio', {
     ordem,
-    title: `OS #${codigo} – Observações Iniciais`
+    title: `OS #${codigo} – Chegada`
   });
 });
 
-// =========================
-// POST /os/:codigo/inicio — salva observações iniciais
-// =========================
 router.post('/os/:codigo/inicio', (req, res) => {
   const codigo = req.params.codigo;
   const dados  = JSON.parse(fs.readFileSync(dataPath));
@@ -159,7 +152,7 @@ router.post('/os/:codigo/inicio', (req, res) => {
   };
 
   dados.logs.push({
-    acao: 'Registrou observações iniciais',
+    acao: 'Registrou chegada',
     codigo,
     data: new Date().toISOString()
   });
@@ -169,11 +162,46 @@ router.post('/os/:codigo/inicio', (req, res) => {
 });
 
 // =========================
-// GET /os/:codigo/upload — formulário de upload de mídia
+// GET/POST /imprevistos
+// =========================
+router.get('/os/:codigo/imprevistos', (req, res) => {
+  const codigo = req.params.codigo;
+  const dados  = JSON.parse(fs.readFileSync(dataPath));
+  const ordem  = dados.ordens.find(os => os.codigo === codigo);
+  if (!ordem) return res.status(404).send('OS não encontrada.');
+
+  res.render('imprevistos', {
+    ordem,
+    title: `OS #${codigo} – Anotações`
+  });
+});
+
+router.post('/os/:codigo/imprevistos', (req, res) => {
+  const codigo = req.params.codigo;
+  const dados  = JSON.parse(fs.readFileSync(dataPath));
+  const ordem  = dados.ordens.find(os => os.codigo === codigo);
+  if (!ordem) return res.status(404).send('OS não encontrada.');
+
+  ordem.imprevistos  = req.body.imprevistos?.trim()  || '';
+  ordem.dificuldades = req.body.dificuldades?.trim() || '';
+  ordem.recomendacoes= req.body.recomendacoes?.trim()|| '';
+
+  dados.logs.push({
+    acao: 'Registrou anotações',
+    codigo,
+    data: new Date().toISOString()
+  });
+
+  fs.writeFileSync(dataPath, JSON.stringify(dados, null, 2));
+  res.redirect(`/os/${codigo}`);
+});
+
+// =========================
+// GET/POST /upload (Mídia Finalização)
 // =========================
 router.get('/os/:codigo/upload', (req, res) => {
   const { codigo } = req.params;
-  const { tipo }   = req.query; // 'inicio' ou 'final'
+  const { tipo }   = req.query; // 'final'
   const dados      = JSON.parse(fs.readFileSync(dataPath));
   const ordem      = dados.ordens.find(os => os.codigo === codigo);
   if (!ordem) return res.status(404).send('OS não encontrada.');
@@ -181,27 +209,19 @@ router.get('/os/:codigo/upload', (req, res) => {
   res.render('upload', {
     ordem,
     tipo,
-    title: `OS #${codigo} – Upload de Mídia (${tipo})`
+    title: `OS #${codigo} – Upload de Mídia`
   });
 });
 
-// =========================
-// POST /os/:codigo/upload — salva foto/vídeo no Cloudinary
-// =========================
 router.post('/os/:codigo/upload', upload.single('arquivo'), (req, res) => {
   const codigo = req.params.codigo;
-  const tipo   = req.body.tipo;    // 'inicio' ou 'final'
+  const tipo   = req.body.tipo; // sempre 'final'
   const file   = req.file;
 
   const dados = JSON.parse(fs.readFileSync(dataPath));
   const ordem = dados.ordens.find(os => os.codigo === codigo);
   if (!ordem) return res.status(404).send('OS não encontrada.');
   if (!file)  return res.status(400).send('Nenhum arquivo enviado.');
-
-  // Bloqueia reenvio de mídias de início
-  if (tipo === 'inicio' && ordem.fotos.inicio.length > 0) {
-    return res.status(400).send('Mídia de início já enviada.');
-  }
 
   const stream = cloudinary.uploader.upload_stream(
     { resource_type: 'auto', folder: `${codigo}/${tipo}` },
@@ -210,15 +230,14 @@ router.post('/os/:codigo/upload', upload.single('arquivo'), (req, res) => {
         console.error('Cloudinary error:', error);
         return res.status(500).send('Erro ao enviar arquivo.');
       }
-      ordem.fotos[tipo].push({
+      ordem.fotos.final.push({
         nome: file.originalname,
         url : result.secure_url
       });
 
       dados.logs.push({
-        acao: 'Enviou arquivo',
+        acao: 'Enviou mídia final',
         codigo,
-        tipo,
         nome: file.originalname,
         data: new Date().toISOString()
       });
@@ -231,111 +250,13 @@ router.post('/os/:codigo/upload', upload.single('arquivo'), (req, res) => {
 });
 
 // =========================
-// GET /os/:codigo/imprevistos — formulário de imprevistos
-// =========================
-router.get('/os/:codigo/imprevistos', (req, res) => {
-  const codigo = req.params.codigo;
-  const dados  = JSON.parse(fs.readFileSync(dataPath));
-  const ordem  = dados.ordens.find(os => os.codigo === codigo);
-  if (!ordem) return res.status(404).send('OS não encontrada.');
-
-  res.render('imprevistos', {
-    ordem,
-    title: `OS #${codigo} – Imprevistos`
-  });
-});
-
-// =========================
-// POST /os/:codigo/imprevistos — salva imprevistos
-// =========================
-router.post('/os/:codigo/imprevistos', (req, res) => {
-  const codigo = req.params.codigo;
-  const dados  = JSON.parse(fs.readFileSync(dataPath));
-  const ordem  = dados.ordens.find(os => os.codigo === codigo);
-  if (!ordem) return res.status(404).send('OS não encontrada.');
-
-  ordem.imprevistos = req.body.imprevistos?.trim() || '';
-
-  dados.logs.push({
-    acao: 'Registrou imprevistos',
-    codigo,
-    data: new Date().toISOString()
-  });
-
-  fs.writeFileSync(dataPath, JSON.stringify(dados, null, 2));
-  res.redirect(`/os/${codigo}`);
-});
-
-// =========================
-// GET /os/:codigo/finalizacao — formulário de dificuldades e recomendações
-// =========================
-router.get('/os/:codigo/finalizacao', (req, res) => {
-  const codigo = req.params.codigo;
-  const dados  = JSON.parse(fs.readFileSync(dataPath));
-  const ordem  = dados.ordens.find(os => os.codigo === codigo);
-  if (!ordem) return res.status(404).send('OS não encontrada.');
-
-  res.render('finalizacao', {
-    ordem,
-    title: `OS #${codigo} – Finalização`
-  });
-});
-
-// =========================
-// POST /os/:codigo/finalizacao — salva dificuldades e recomendações
-// =========================
-router.post('/os/:codigo/finalizacao', (req, res) => {
-  const codigo = req.params.codigo;
-  const dados  = JSON.parse(fs.readFileSync(dataPath));
-  const ordem  = dados.ordens.find(os => os.codigo === codigo);
-  if (!ordem) return res.status(404).send('OS não encontrada.');
-
-  ordem.dificuldades    = req.body.dificuldades?.trim()    || '';
-  ordem.recomendacoes   = req.body.recomendacoes?.trim()   || '';
-
-  dados.logs.push({
-    acao: 'Registrou finalização',
-    codigo,
-    data: new Date().toISOString()
-  });
-
-  fs.writeFileSync(dataPath, JSON.stringify(dados, null, 2));
-  res.redirect(`/os/${codigo}`);
-});
-
-// =========================
-// POST /os/:codigo/checklist — salva checklist de saída
-// =========================
-router.post('/os/:codigo/checklist', (req, res) => {
-  const codigo = req.params.codigo;
-  const dados  = JSON.parse(fs.readFileSync(dataPath));
-  const ordem  = dados.ordens.find(os => os.codigo === codigo);
-  if (!ordem) return res.status(404).send('OS não encontrada.');
-
-  ordem.checklist = {
-    teste_funcionamento: !!req.body.teste_funcionamento,
-    limpeza_local       : !!req.body.limpeza_local,
-    entrega_controle    : !!req.body.entrega_controle
-  };
-
-  dados.logs.push({
-    acao: 'Preencheu checklist de saída',
-    codigo,
-    data: new Date().toISOString()
-  });
-
-  fs.writeFileSync(dataPath, JSON.stringify(dados, null, 2));
-  res.redirect(`/os/${codigo}`);
-});
-
-// =========================
-// POST /os/:codigo/status — altera status com todas as validações
+// POST /os/:codigo/status
 // =========================
 router.post('/os/:codigo/status', (req, res) => {
-  const codigo    = req.params.codigo;
-  const novoStatus= req.body.status;
-  const dados     = JSON.parse(fs.readFileSync(dataPath));
-  const ordem     = dados.ordens.find(os => os.codigo === codigo);
+  const codigo     = req.params.codigo;
+  const novoStatus = req.body.status;
+  const dados      = JSON.parse(fs.readFileSync(dataPath));
+  const ordem      = dados.ordens.find(os => os.codigo === codigo);
 
   if (!ordem) return res.status(404).send('OS não encontrada.');
   if (ordem.status === 'Concluído') {
@@ -347,7 +268,7 @@ router.post('/os/:codigo/status', (req, res) => {
     const prep = ordem.checklist_preparo || {};
     if (!prep.combustivel || !prep.ferramentas || !prep.epi) {
       return res.status(400)
-        .send('Checklist de preparo incompleto. Não é possível iniciar execução.');
+        .send('Checklist de preparo incompleto.');
     }
   }
 
@@ -355,34 +276,20 @@ router.post('/os/:codigo/status', (req, res) => {
   if (novoStatus === 'Concluído') {
     const prep      = ordem.checklist_preparo || {};
     const obsInicio = ordem.observacoes_inicio;
-    const checkOut  = ordem.checklist || {};
-    const midiaIni  = ordem.fotos.inicio || [];
-    const midiaFin  = ordem.fotos.final  || [];
-    const finaliz   = ordem.dificuldades?.trim() || ordem.recomendacoes?.trim();
+    const midiaFin  = ordem.fotos.final || [];
+    const anotacoes = ordem.imprevistos?.trim() || ordem.dificuldades?.trim() || ordem.recomendacoes?.trim();
 
     if (!prep.combustivel || !prep.ferramentas || !prep.epi) {
-      return res.status(400)
-        .send('Checklist de preparo incompleto. Não é possível concluir.');
+      return res.status(400).send('Checklist de preparo incompleto.');
     }
     if (!obsInicio) {
-      return res.status(400)
-        .send('Observações iniciais não registradas.');
-    }
-    if (midiaIni.length === 0) {
-      return res.status(400)
-        .send('Envie ao menos uma mídia de início antes de concluir.');
-    }
-    if (!checkOut.teste_funcionamento || !checkOut.limpeza_local || !checkOut.entrega_controle) {
-      return res.status(400)
-        .send('Checklist de saída incompleto.');
+      return res.status(400).send('Chegada não registrada.');
     }
     if (midiaFin.length === 0) {
-      return res.status(400)
-        .send('Envie ao menos uma mídia final antes de concluir.');
+      return res.status(400).send('Envie ao menos uma mídia final.');
     }
-    if (!finaliz) {
-      return res.status(400)
-        .send('Preencha dificuldades ou recomendações antes de concluir.');
+    if (!anotacoes) {
+      return res.status(400).send('Registre ao menos uma anotação.');
     }
   }
 
@@ -399,14 +306,5 @@ router.post('/os/:codigo/status', (req, res) => {
   fs.writeFileSync(dataPath, JSON.stringify(dados, null, 2));
   res.redirect(`/os/${codigo}`);
 });
-
-
-// GET /adm — Admin Dashboard
-router.get('/adm', (req, res) => {
-  res.render('adm', {
-    title: 'Painel de Administração'
-  });
-});
-
 
 module.exports = router;

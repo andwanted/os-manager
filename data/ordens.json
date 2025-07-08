@@ -74,14 +74,29 @@
       "status": "Pendente",
       "fotos": {
         "inicio": [],
-        "final": []
+        "final": [
+          {
+            "nome": "Captura de tela de 2025-06-05 22-35-36.png",
+            "url": "https://res.cloudinary.com/devjlsmtj/image/upload/v1751940837/1757/final/qjigha1fo7y69xxajphl.png"
+          }
+        ]
       },
       "checklist": {
         "teste_funcionamento": true,
         "limpeza_local": true,
         "entrega_controle": true
       },
-      "criadoEm": "2025-07-06T15:02:50.652Z"
+      "criadoEm": "2025-07-06T15:02:50.652Z",
+      "checklist_preparo": {
+        "combustivel": true,
+        "ferramentas": true,
+        "epi": true
+      },
+      "observacoes_inicio": {
+        "conforme": true,
+        "texto": ""
+      },
+      "imprevistos": "AAAAAa"
     },
     {
       "id": 1751817003720,
@@ -289,6 +304,28 @@
       "acao": "Registrou finalização",
       "codigo": "8514",
       "data": "2025-07-06T17:54:04.105Z"
+    },
+    {
+      "acao": "Preencheu checklist de preparo",
+      "codigo": "1757",
+      "data": "2025-07-08T02:08:40.155Z"
+    },
+    {
+      "acao": "Registrou observações iniciais",
+      "codigo": "1757",
+      "data": "2025-07-08T02:08:45.140Z"
+    },
+    {
+      "acao": "Registrou imprevistos",
+      "codigo": "1757",
+      "data": "2025-07-08T02:08:53.093Z"
+    },
+    {
+      "acao": "Enviou arquivo",
+      "codigo": "1757",
+      "tipo": "final",
+      "nome": "Captura de tela de 2025-06-05 22-35-36.png",
+      "data": "2025-07-08T02:13:57.653Z"
     }
   ]
 }

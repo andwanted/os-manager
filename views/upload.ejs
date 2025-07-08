@@ -1,42 +1,49 @@
-<a href="/os/<%= ordem.codigo %>" 
-   class="btn btn-outline-secondary mb-3 d-md-none">
-  ⬅️ Voltar
-</a>
+<%- include('partials/header', { title }) %>
 
-<h2>📷 Upload de Mídia</h2>
-<p>Tipo de Mídia: <strong><%= tipo.charAt(0).toUpperCase() + tipo.slice(1) %></strong></p>
+<div class="container py-4">
+  <h2 class="mb-3">Upload de Mídia - <%= tipo === 'final' ? 'Finalização' : 'Início' %></h2>
 
-<form action="/os/<%= ordem.codigo %>/upload" 
-      method="POST" 
-      enctype="multipart/form-data">
+  <!-- upload.ejs -->
+<h1>OS #<%= ordem.codigo %> – Upload de Mídia (<%= tipo === 'inicio' ? 'Início' : 'Final' %>)</h1>
+
+<form action="/os/<%= ordem.codigo %>/upload" method="POST" enctype="multipart/form-data">
   <input type="hidden" name="tipo" value="<%= tipo %>">
 
   <div class="mb-3">
-    <label for="arquivo" class="form-label">Selecione o arquivo</label>
-    <input class="form-control" 
-           type="file" 
-           name="arquivo" 
-           id="arquivo" 
-           accept="image/*,video/*" 
-           required>
+    <label for="arquivo" class="form-label">Selecione o arquivo (foto ou vídeo):</label>
+    <input type="file" name="arquivo" id="arquivo" class="form-control" accept="image/*,video/*" required>
   </div>
 
-  <button type="submit" class="btn btn-primary w-100">
-    Enviar
-  </button>
+  <button type="submit" class="btn btn-success">Enviar</button>
+  <a href="/os/<%= ordem.codigo %>" class="btn btn-secondary ms-2">Cancelar</a>
 </form>
 
-<% if (ordem.fotos[tipo] && ordem.fotos[tipo].length) { %>
-  <hr>
-  <h5>Arquivos já enviados:</h5>
-  <ul class="list-group">
-    <% ordem.fotos[tipo].forEach(file => { %>
-      <li class="list-group-item">
-        <a href="<%= file.url %>" target="_blank">
-          <i class="bi bi-file-earmark-arrow-up"></i> 
-          <%= file.nome %>
-        </a>
-      </li>
-    <% }) %>
-  </ul>
-<% } %>
+
+  <form action="/os/<%= ordem.codigo %>/upload" method="POST" enctype="multipart/form-data">
+    <input type="hidden" name="tipo" value="<%= tipo %>">
+    <div class="mb-3">
+      <label for="arquivo" class="form-label">Selecione o arquivo</label>
+      <input class="form-control" type="file" name="arquivo" id="arquivo" required>
+    </div>
+    <button type="submit" class="btn btn-primary">Enviar</button>
+  </form>
+
+  <% if (ordem.fotos[tipo]?.length > 0) { %>
+    <hr>
+    <h5>Arquivos Enviados</h5>
+    <div class="row">
+      <% ordem.fotos[tipo].forEach(f => { %>
+        <div class="col-md-4 mb-3">
+          <div class="card">
+            <img src="<%= f.url %>" class="card-img-top" alt="<%= f.nome %>">
+            <div class="card-body">
+              <small class="text-muted"><%= f.nome %></small>
+            </div>
+          </div>
+        </div>
+      <% }) %>
+    </div>
+  <% } %>
+</div>
+
+<%- include('partials/footer') %>

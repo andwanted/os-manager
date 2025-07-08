@@ -1,29 +1,52 @@
-<a href="/os/<%= ordem.codigo %>/preparo" class="btn btn-outline-secondary mb-3">
-  ⬅️ Voltar
-</a>
+<!-- inicio.ejs -->
+<h1>OS #<%= ordem.codigo %> – Observações Iniciais</h1>
 
-<h2>📍 Chegada ao Local</h2>
 <form action="/os/<%= ordem.codigo %>/inicio" method="POST">
-  <div class="row g-4">
-    <div class="col-12 col-md-6">
-      <label class="form-label d-block">Local conforme?</label>
-      <div class="form-check">
-        <input class="form-check-input" type="radio" name="conforme" id="conformeSim" value="sim"
-          <%= ordem.observacoes_inicio?.conforme ? 'checked' : '' %> >
-        <label class="form-check-label" for="conformeSim">Sim</label>
-      </div>
-      <div class="form-check">
-        <input class="form-check-input" type="radio" name="conforme" id="conformeNao" value="nao"
-          <%= ordem.observacoes_inicio?.conforme === false ? 'checked' : '' %> >
-        <label class="form-check-label" for="conformeNao">Não</label>
-      </div>
-    </div>
-
-    <div class="col-12 col-md-6">
-      <label for="texto" class="form-label">Observações iniciais</label>
-      <textarea class="form-control" name="texto" id="texto" rows="4"><%= ordem.observacoes_inicio?.texto || '' %></textarea>
-    </div>
+  <div class="form-check mb-3">
+    <input class="form-check-input" type="radio" name="conforme" id="conformeSim" value="sim" <%= ordem.observacoes_inicio?.conforme ? 'checked' : '' %>>
+    <label class="form-check-label" for="conformeSim">
+      Conforme
+    </label>
   </div>
 
-  <button type="submit" class="btn btn-primary mt-4 w-100">Salvar e continuar</button>
+  <div class="form-check mb-3">
+    <input class="form-check-input" type="radio" name="conforme" id="conformeNao" value="nao" <%= ordem.observacoes_inicio?.conforme === false ? 'checked' : '' %>>
+    <label class="form-check-label" for="conformeNao">
+      Não Conforme
+    </label>
+  </div>
+
+  <div class="mb-3">
+    <label for="texto" class="form-label">Observações adicionais</label>
+    <textarea class="form-control" id="texto" name="texto" rows="4"><%= ordem.observacoes_inicio?.texto || '' %></textarea>
+  </div>
+
+  <button type="submit" class="btn btn-primary">Salvar Observações</button>
 </form>
+
+<hr>
+
+<!-- Botão para envio de mídia inicial -->
+<div class="mt-4">
+  <a href="/os/<%= ordem.codigo %>/upload?tipo=inicio" class="btn btn-success">
+    <i class="bi bi-camera"></i> Enviar Mídia Inicial
+  </a>
+</div>
+
+<!-- Exibe mídias enviadas (se houver) -->
+<% if (ordem.fotos.inicio && ordem.fotos.inicio.length > 0) { %>
+  <h4 class="mt-4">Mídias enviadas:</h4>
+  <div class="row">
+    <% ordem.fotos.inicio.forEach((foto) => { %>
+      <div class="col-md-3 mb-3">
+        <a href="<%= foto.url %>" target="_blank" rel="noopener noreferrer">
+          <% if (foto.url.match(/\.(mp4|mov|avi)$/i)) { %>
+            <video src="<%= foto.url %>" controls style="width: 100%; border-radius: 8px;"></video>
+          <% } else { %>
+            <img src="<%= foto.url %>" alt="<%= foto.nome %>" class="img-fluid rounded" />
+          <% } %>
+        </a>
+      </div>
+    <% }) %>
+  </div>
+<% } %>
